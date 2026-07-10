@@ -41,8 +41,7 @@ jobs:
           EOF
       - name: Debug feed fetch
         run: |
-          curl -sv -A "Mozilla/5.0 (compatible; GitHubActionsBot)" \
-            https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2 \
+          curl -sv https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2 \
             -o feed-debug.xml
           echo "--- HTTP status/headers above ---"
           head -c 500 feed-debug.xml
