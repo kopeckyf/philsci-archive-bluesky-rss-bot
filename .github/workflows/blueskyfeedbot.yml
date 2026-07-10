@@ -10,45 +10,30 @@ jobs:
   rss-to-bluesky:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Node fetch
+      - name: Compare Node requests
         run: |
           node - <<'EOF'
-          fetch('https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2')
-            .then(async r => {
-              console.log("status:", r.status);
-              console.log("content-type:", r.headers.get("content-type"));
-              const text = await r.text();
-              console.log(text.slice(0, 500));
-              require('fs').writeFileSync('node-feed.xml', text);
-            })
-            .catch(console.error);
-          EOF
-      - name: Debug feed XML
-        run: |
-          npm install @extractus/feed-extractor
-          node - <<'EOF'
-          const { extract } = require('@extractus/feed-extractor');
+          async function test(name, options) {
+            const r = await fetch(
+              'https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2',
+              options
+            );
+            const text = await r.text();
+            console.log('\n---', name, '---');
+            console.log('status:', r.status);
+            console.log('content-type:', r.headers.get('content-type'));
+            console.log(text.slice(0, 100));
+          }
       
-          extract("https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2")
-            .then(feed => {
-              console.log("OK");
-              console.log(feed.entries.length);
-            })
-            .catch(err => {
-              console.error(err);
-              process.exit(1);
+          (async () => {
+            await test('default', {});
+            await test('browser UA', {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; GitHubActionsBot)'
+              }
             });
+          })();
           EOF
-      - name: Debug feed fetch
-        run: |
-          curl -sv https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2 \
-            -o feed-debug.xml
-          echo "--- HTTP status/headers above ---"
-          head -c 500 feed-debug.xml
-      - uses: actions/upload-artifact@v4
-        with:
-          name: feed-debug
-          path: feed-debug.xml
       - name: Generate cache key
         uses: actions/github-script@v6
         id: generate-key
