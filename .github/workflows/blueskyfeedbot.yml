@@ -10,6 +10,22 @@ jobs:
   rss-to-bluesky:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug feed XML
+        run: |
+          npm install @extractus/feed-extractor
+          node - <<'EOF'
+          const { extract } = require('@extractus/feed-extractor');
+      
+          extract("https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2")
+            .then(feed => {
+              console.log("OK");
+              console.log(feed.entries.length);
+            })
+            .catch(err => {
+              console.error(err);
+              process.exit(1);
+            });
+          EOF
       - name: Debug feed fetch
         run: |
           curl -sv -A "Mozilla/5.0 (compatible; GitHubActionsBot)" \
