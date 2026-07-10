@@ -10,6 +10,19 @@ jobs:
   rss-to-bluesky:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Node fetch
+        run: |
+          node - <<'EOF'
+          fetch('https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2')
+            .then(async r => {
+              console.log("status:", r.status);
+              console.log("content-type:", r.headers.get("content-type"));
+              const text = await r.text();
+              console.log(text.slice(0, 500));
+              require('fs').writeFileSync('node-feed.xml', text);
+            })
+            .catch(console.error);
+          EOF
       - name: Debug feed XML
         run: |
           npm install @extractus/feed-extractor
@@ -50,7 +63,7 @@ jobs:
           key: feed-cache-${{ steps.generate-key.outputs.cache-key }}
           restore-keys: feed-cache-
       - name: GitHub
-        uses: 'joschi/blueskyfeedbot@6b9e8f5e9c99b2c9b80a96f6824ed69c0337f1d4'
+        uses: 'joschi/blueskyfeedbot@v1'
         with:
           # This is the RSS feed you want to publish
           rss-feed: https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2
