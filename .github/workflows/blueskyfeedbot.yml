@@ -10,6 +10,17 @@ jobs:
   rss-to-bluesky:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug feed fetch
+        run: |
+          curl -sv -A "Mozilla/5.0 (compatible; GitHubActionsBot)" \
+            https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2 \
+            -o feed-debug.xml
+          echo "--- HTTP status/headers above ---"
+          head -c 500 feed-debug.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feed-debug
+          path: feed-debug.xml
       - name: Generate cache key
         uses: actions/github-script@v6
         id: generate-key
