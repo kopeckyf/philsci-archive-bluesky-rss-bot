@@ -26,7 +26,7 @@ jobs:
         uses: 'joschi/blueskyfeedbot@v1'
         with:
           # This is the RSS feed you want to publish
-          rss-feed: https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS
+          rss-feed: https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2
           # Template of status posted to Bluesky (Handlebars)
           template: |
             New on the Archive:
