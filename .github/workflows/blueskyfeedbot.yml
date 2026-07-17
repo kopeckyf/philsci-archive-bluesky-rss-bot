@@ -10,30 +10,15 @@ jobs:
   rss-to-bluesky:
     runs-on: ubuntu-latest
     steps:
-      - name: Compare Node requests
+      - name: Fetch RSS from PhilSci-Archive
         run: |
-          node - <<'EOF'
-          async function test(name, options) {
-            const r = await fetch(
-              'https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2',
-              options
-            );
-            const text = await r.text();
-            console.log('\n---', name, '---');
-            console.log('status:', r.status);
-            console.log('content-type:', r.headers.get('content-type'));
-            console.log(text.slice(0, 100));
-          }
-      
-          (async () => {
-            await test('default', {});
-            await test('browser UA', {
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; GitHubActionsBot)'
-              }
-            });
-          })();
-          EOF
+          curl -L \
+            "https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS" \
+            -o philsciarchivefeed.xml
+      - name: Serve XML file to bot
+        run: |
+          python3 -m http.server 8000 &
+          sleep 2
       - name: Generate cache key
         uses: actions/github-script@v6
         id: generate-key
@@ -50,7 +35,7 @@ jobs:
         uses: 'joschi/blueskyfeedbot@v1'
         with:
           # This is the RSS feed you want to publish
-          rss-feed: https://philsci-archive.pitt.edu/cgi/latest_tool?output=RSS2
+          rss-feed: http://127.0.0.1:8000/philsciarchivefeed.xml
           # Template of status posted to Bluesky (Handlebars)
           template: |
             New on the Archive:
