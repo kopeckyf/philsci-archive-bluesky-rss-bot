@@ -18,7 +18,7 @@ jobs:
       - name: Serve XML file to bot
         run: |
           python3 -m http.server 8000 &
-          sleep 2
+          sleep 5
       - name: Generate cache key
         uses: actions/github-script@v6
         id: generate-key
